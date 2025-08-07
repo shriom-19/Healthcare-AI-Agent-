@@ -1,0 +1,668 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "=POST",
+        "path": "whatsapp-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -224,
+        -192
+      ],
+      "id": "e118d6a7-829d-48c5-aedd-01804a8e152b",
+      "name": "Webhook",
+      "webhookId": "8e4c164c-4cfb-4e38-a0a9-08a69f3ba306"
+    },
+    {
+      "parameters": {
+        "from": "+14155238886",
+        "to": "={{ $('Webhook').item.json.body.WaId }}",
+        "toWhatsapp": true,
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -192
+      ],
+      "id": "7d442b41-fe73-4116-acab-78879368e946",
+      "name": "Send an SMS/MMS/WhatsApp message1",
+      "credentials": {
+        "twilioApi": {
+          "id": "4wxrK72hvJEgA1uu",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "\"Message sent successfully",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        432,
+        -192
+      ],
+      "id": "96b5b974-4c2b-47f7-b931-6de4e659c877",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "from": "+14155238886",
+        "to": "={{ $('Webhook').item.json.body.WaId }}",
+        "toWhatsapp": true,
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        -384
+      ],
+      "id": "05d85cff-f73e-4ada-aa0e-f780daeeedf5",
+      "name": "Send an SMS/MMS/WhatsApp message",
+      "credentials": {
+        "twilioApi": {
+          "id": "4wxrK72hvJEgA1uu",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=\"Message sent successfully",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1264,
+        -288
+      ],
+      "id": "96256ee3-2d77-410f-b826-0dace7d5fb73",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Healthcare AI Receptionist.\n\nIncoming message: {{ $json.body.Body }}\n\n---\n\n### Step 1: Analyze Health Message\n\n→ Detect issue severity from the message content.\n\n- If **minor issue** (e.g., cold, headache, sore throat, fatigue, mild fever), respond with home remedies and advice.  \n  → Set: `action = chat`\n\n- If **serious issue** (e.g., chest pain, injury, high fever, breathing difficulty) OR if the user **asks for appointment**, respond:  \n  “Let’s book your appointment.”  \n  → Set: `action = booking`\n\nExtract `action` as either `\"chat\"` or `\"booking\"`\n\n---\n\n### Step 2A: If action = chat  \n→ Reply with advice. Example:  \n“It seems like a minor health issue. Here are some tips: Stay hydrated, rest well, and consider OTC medications. If it worsens, consult a doctor.”\n\n→ No need to collect info. Exit.\n\n---\n\n### Step 2B: If action = booking  \n→ Start **data collection loop** until all required fields are filled.\n\n---\n\n### Required Fields (collect one by one):\n\n1. Full Name → `name`\n2. Age → `age`\n3. Email → `email`\n4. Health Issue → `issue`\n5. Symptoms → `symptoms`\n6. Preferred Date (YYYY-MM-DD) → `date`\n7. Preferred Time (HH:MM) → `time`\n\n---\n\n### Collection Loop Logic:\n\n→ Check what data is missing.  \n→ Ask one question at a time for each missing field.\n\nExample questions:\n- \"May I have your full name?\"\n- \"How old are you?\"\n- \"Please provide your email address.\"\n- \"What health issue are you facing?\"\n- \"Can you describe your symptoms?\"\n- \"Which date would you prefer for the appointment? (YYYY-MM-DD)\"\n- \"What time suits you best? (HH:MM)\"\n\n→ Wait for response → save answer → repeat for next missing field.\n\n---\n\n### Step 3: When All Info is Collected\n\nOutput ONLY this structured JSON:\n```json\n{\n  \"name\": \"<Full Name>\",\n  \"age\": <Age>,\n  \"email\": \"<Email>\",\n  \"issue\": \"<Health Issue>\",\n  \"symptoms\": \"<Symptoms>\",\n  \"date\": \"<Preferred Date>\",\n  \"time\": \"<Preferred Time>\",\n  \"status\": \"complete\"\n}\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        -256
+      ],
+      "id": "b5628eb7-c0a3-4c4c-bd43-3357c0571932",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxOutputTokens": 2048
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        -64
+      ],
+      "id": "d30a90a2-ae20-4d9e-b854-ec3e78d6d458",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "KSB5rrMEqJLtmGer",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.From }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -16,
+        -32
+      ],
+      "id": "dec1cc6d-9931-44fd-8115-e613dd1aafe4",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        672,
+        144
+      ],
+      "id": "324624d2-beab-450d-ae23-e424f17b7440",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "KSB5rrMEqJLtmGer",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook1').item.json.body.From }} "
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        752,
+        144
+      ],
+      "id": "9c63eaa0-b00e-48c1-81d8-4dedfaf223a1",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Please collect the following appointment details one by one.\n\nAsk the user for:\n1. Full Name\n2. Age\n3. Email\n4. Health Issue\n5. Symptoms\n6. Preferred Date (YYYY-MM-DD)\n7. Preferred Time (HH:MM)\n\n{{ $json.body.Body }}\nOnce all answers are collected, output ONLY this structured JSON below:\n {\n  \"name\": \"<Full Name>\",\n  \"age\": <Age>,\n  \"email\": \"<Email>\",\n  \"issue\": \"<Health Issue>\",\n  \"symptoms\": \"<Symptoms>\",\n  \"date\": \"<Preferred Date>\",\n  \"time\": \"<Preferred Time>\",\n  \"status\": \"complete\"\n}\n\nIf data is still missing, ask for it and do not send the final JSON.\nfill suitable component as per the tag in supabase\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        -48
+      ],
+      "id": "0c3f481d-1062-4b8d-aa09-631e29f17013",
+      "name": "appoinment"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.sessionData.email }}",
+        "subject": "Appointment Confirmation",
+        "emailType": "text",
+        "message": "=Dear {{ $json.sessionData.name }},\n\nYour appointment has been successfully booked.\n\n📋 Appointment Details:\n👤 Name: {{ $json.sessionData.name }}\n🎂 Age: {{ $json.sessionData.age }}\n📞 Phone: {{ $json.phoneNumber }}\n📧 Email: {{ $json.sessionData.email }}\n🏥 Issue: {{ $json.sessionData.issue_topic }}\n📝 Symptoms: {{ $json.sessionData.description }}\n\nWe will contact you soon. Thank you!\n\n- AI Healthcare Bot\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1072,
+        80
+      ],
+      "id": "7bfabef3-29a8-4f00-bc07-18866be8df71",
+      "name": "Send a message",
+      "webhookId": "66fe3f2c-b01b-478d-ace7-5d74f9d7d288",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "uS2rZNyyxCPo4PTv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        656,
+        -208
+      ],
+      "id": "dee4e787-1fc7-4f58-aca7-f99cfcb33672",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "KSB5rrMEqJLtmGer",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.From }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        800,
+        -208
+      ],
+      "id": "0e18766e-b794-4a6d-8a1a-ec8f1b6055ea",
+      "name": "Simple Memory2"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get many rows in Supabase \n\ngive last reply\n✅ Appointment Confirmed!\n\n📅 Date: {{ $json.date }}\n⏰ Time: {{ $json.time }}\n👤 Name: {{ $json.name }}\n📞 Phone: {{ $json.From }}\n📧 Email: {{ $json.email }}\n🏥 Issue: {{ $json.issue }}\n\nThank you!\n",
+        "operation": "getAll",
+        "tableId": "appointments",
+        "limit": "=100",
+        "filterType": "string",
+        "filterString": "contact"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -48
+      ],
+      "id": "2ee64056-acba-4f28-88a9-9f50cef68339",
+      "name": "Get many rows in Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "DXauDj9B1f32ifVt",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=✅ Appointment Confirmed!\n\n📅 Date: {{ $json.appointment_date }}\n⏰ Time: {{ $json.appointment_time }}\n👤 Name: {{ $json.name }}\n📞 Phone: {{ $json.contact }}\n📧 Email: {{ $json.email }}\n🏥 Issue: {{ $json.issue_topic }}\n\nThank you for booking with us!\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        -384
+      ],
+      "id": "b3c638d7-fbd6-4731-bb21-35bce6d6eacd",
+      "name": "final display"
+    },
+    {
+      "parameters": {
+        "from": "+14155238886",
+        "to": "={{ $('Webhook1').item.json.body.WaId }}",
+        "toWhatsapp": true,
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        944,
+        -48
+      ],
+      "id": "fefeb315-72d0-4f39-a945-5576dba01bdc",
+      "name": "apoint",
+      "credentials": {
+        "twilioApi": {
+          "id": "4wxrK72hvJEgA1uu",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "whatsapp-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        480,
+        16
+      ],
+      "id": "9b357acb-ad39-4dcb-b999-63f0d97f28ca",
+      "name": "Webhook1",
+      "webhookId": "8e4c164c-4cfb-4e38-a0a9-08a69f3ba306",
+      "notesInFlow": true
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "\"Message sent successfully",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1104,
+        -64
+      ],
+      "id": "853876c4-31f2-4387-9c02-63f2bb072b3c",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "tableId": "chat_sessions",
+        "dataToSend": "={{ $json.output }}"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -384
+      ],
+      "id": "03d00ae7-3d65-474a-9e00-7eddb6d6d388",
+      "name": "Create a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "DXauDj9B1f32ifVt",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get many rows in Supabase \n\ngive last reply\n✅ Appointment Confirmed!\n\n📅 Date: {{ $json.date }}\n⏰ Time: {{ $json.time }}\n👤 Name: {{ $json.name }}\n📞 Phone: {{ $json.From }}\n📧 Email: {{ $json.email }}\n🏥 Issue: {{ $json.issue }}\n\nThank you!\n",
+        "operation": "getAll",
+        "tableId": "appointments",
+        "limit": "=100",
+        "filterType": "string",
+        "filterString": "contact"
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        960,
+        -224
+      ],
+      "id": "f303cf92-a489-4e50-8bc1-438e31405a8e",
+      "name": "Get many rows in Supabase1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "DXauDj9B1f32ifVt",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "This node stores patient appointment data collected by the Healthcare AI receptionist. It appends each new patient's details (name, age, email, issue, symptoms, date, time) into a connected Excel sheet for easy tracking and management. Append data to sheet in Microsoft Excel 365",
+        "resource": "worksheet",
+        "operation": "append",
+        "workbook": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "worksheet": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "dataMode": "autoMap",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftExcelTool",
+      "typeVersion": 2.1,
+      "position": [
+        176,
+        48
+      ],
+      "id": "c8de4b6c-de57-452f-86a3-dc6afc712011",
+      "name": "Append data to sheet in Microsoft Excel 365",
+      "credentials": {
+        "microsoftExcelOAuth2Api": {
+          "id": "EpcvscyKLETCWtl5",
+          "name": "Microsoft Excel account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an SMS/MMS/WhatsApp message1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an SMS/MMS/WhatsApp message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send an SMS/MMS/WhatsApp message1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "final display",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "appoinment",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "appoinment",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "appoinment": {
+      "main": [
+        [
+          {
+            "node": "apoint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "final display",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "final display",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows in Supabase": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "final display": {
+      "main": [
+        [
+          {
+            "node": "Send an SMS/MMS/WhatsApp message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook1": {
+      "main": [
+        []
+      ]
+    },
+    "apoint": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "appoinment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        []
+      ]
+    },
+    "Get many rows in Supabase1": {
+      "ai_tool": [
+        [
+          {
+            "node": "final display",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "final display",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    },
+    "Append data to sheet in Microsoft Excel 365": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "cf4ffcad-a731-42c3-a7c5-c318a8feeb90",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "376660f92e07b7dfb7201742ac107b4607d5e115b6b5c12311eba30ee81373af"
+  },
+  "id": "qBXteq36Qj7nguR0",
+  "tags": []
+}
